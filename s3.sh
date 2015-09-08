@@ -9,6 +9,16 @@
 # $0 GET <bucket> <path_in_bucket> <local_downloaded_filename> [version]
 #
 
+if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
+    echo "You must set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY"  >&2
+    exit 1
+fi
+
+if [ -z "$REGION" ]; then
+    echo "You must set REGION"  >&2
+    exit 1
+fi
+
 
 method="${1}"
 if [ "$method" = "PUT" ]; then
