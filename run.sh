@@ -143,11 +143,6 @@ load)
         exit 0
     fi
     rm -f $EXTRACT_PATH/__completed
-    #[ -n "$VERSION" ] && V_YEAH=" version $VERSION"
-    #echo "downloading tarball from s3://$BUCKET/$REMOTE_URI,$V_YEAH and extracting to $EXTRACT_PATH"
-    #CMD="/s3.sh GET $BUCKET $REMOTE_URI - $VERSION"
-    #echo running \$ $CMD
-    #$CMD | tar -xz -C $EXTRACT_PATH
     retrieve $REMOTE_URI - | tar -xz -C $EXTRACT_PATH
     if [ $? -ne 0 ]; then
         echo "failed to get the tarball"
@@ -163,10 +158,24 @@ savesql)
     mkdir $DUMP_DIR
     shift 2
     DB_PORT=3306
+
     DUMP_CMD="mysqldump --add-drop-database --add-drop-table -u${DB_USER} -p${DB_PASS} -P${DB_PORT} -h${DB_HOST}"
     for d in $@; do
+        # test if DB exists and is accesible
+        mysql -u $DB_USER -h $DB_HOST -p${DB_PASS} ${d} -e 'show tables' > /dev/null
+        if [ $? -ne 0 ]; then
+            echo "database $d might not exists on host $DB_HOST, or user "
+            echo "$DB_USER doesn't have access to it. Verify your credentials."
+            echo "THE DUMP IS NOT CREATED!"
+            exit 1
+        fi
         echo "Dumping db $d ..."
         $DUMP_CMD "$d" > "$DUMP_DIR/$d"
+        if [ $? -ne 0 ]; then
+            echo "Some sort of error while dumping the db, check the output ^."
+            echo "THE DUMP IS NOT CREATED!"
+            exit 1
+        fi
     done
     cd $DUMP_DIR
     tar -czf $TMPFILE *
@@ -200,10 +209,6 @@ loadsql)
     REMOTE_URI=$2
     DUMP=/dump.tar.gz
     retrieve $REMOTE_URI $DUMP
-
-    #CMD="/s3.sh GET $BUCKET $REMOTE_URI $DUMP $VERSION"
-    #echo running \$ $CMD
-    #$CMD
 
     DUMP_DIR=/tmp/dumpdir
     mkdir $DUMP_DIR
@@ -268,9 +273,6 @@ loadsqlite)
     ZIPDUMP=/dump.gz
     DUMP=/dump
     retrieve $REMOTE_URI $ZIPDUMP
-    #CMD="/s3.sh GET $BUCKET $REMOTE_URI $ZIPDUMP $VERSION"
-    #echo running \$ $CMD
-    #$CMD
     gunzip $ZIPDUMP
     echo "loading dump to $3"
     sqlite3 "$3" ".restore $DUMP"

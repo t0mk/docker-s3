@@ -1,4 +1,4 @@
-FROM gliderlabs/alpine:3.1
+FROM gliderlabs/alpine:3.2
 
 ENV AWS_ACCESS_KEY_ID specify_on_runtime
 ENV AWS_SECRET_ACCESS_KEY specify_on_runtime

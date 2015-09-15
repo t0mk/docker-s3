@@ -21,9 +21,10 @@ $ docker build -t t0mk/s3 ./
 
 You must set env vars: `REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY`.
 
-### docker-compose example
+### exampel of boostrap with docker-compose
 
 ```
+# database initialization
 loaddb:
   image: t0mk/s3
   environment:
@@ -55,6 +56,19 @@ dbvolume:
   volumes:
     - /var/lib/mysql
 
+```
+
+### example of backup compose file
+
+```
+savedb:
+  image: t0mk/s3
+  env_file: envvars
+  volumes:
+    - ./out:/out
+  external_links:
+    - "__compose_dir__container_name__1:drupaldb"
+  command: savesql /out/dbdump.tar.gz ${DB_NAME}
 ```
 
 
