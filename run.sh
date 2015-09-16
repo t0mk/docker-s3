@@ -39,7 +39,9 @@ store () {
 retrieve () {
     SRC="$1"
     LOCALFILE="$2"
-    echo "retrieving $SRC to $LOCALFILE" >&2
+    WHERE="$LOCALFILE"
+    [ "$WHERE" = "-" ] && WHERE=stdout
+    echo "retrieving $SRC to $WHERE" >&2
     if [ "${SRC:0:5}" = "s3://" ]; then
         BUCKET=`echo $SRC | cut -d'/' -f 3`
         S3PATH=`echo $SRC | cut -d'/' -f '4-' | cut -d':' -f 1`
@@ -56,7 +58,11 @@ retrieve () {
              exit 1
         fi
     else
-        cp $SRC $LOCALFILE
+        if [ "$LOCALFILE" = "-" ]; then
+            cat $SRC
+        else
+            cp $SRC $LOCALFILE
+        fi
     fi
 }
 
@@ -72,14 +78,14 @@ help)
     echo "- or just absolute file-path (pointing to a volume) in the container:"
     echo "  - /volume/file.gz"
     echo
-    echo "=> save <path> <dir1> [dirN]*"
-    echo "   saves tar.gz with dirs listed in args to S3path to bucket BUCKET"
+    echo "=> save <path> <dir>"
+    echo "   saves tar.gz with <dir> listed in args to <path>"
     echo "   example: "
     echo "     save s3://mybucket/files.tar.gz /var/www/sites/default/files"
     echo "     save /volume/files.tar.gz /var/www/sites/default/files"
     echo
     echo "=> load <path>[:<S3_object_version>] <extract_dir>"
-    echo "   downloads tar.gz from S3path in bucket BUCKET and extracts it to"
+    echo "   downloads tar.gz from <path> and extracts it to"
     echo "   extract_dir. Extract dir must exists and should be a volume."
     echo "   examples:"
     echo "     load s3://mybucket/files.tar.gz /var/www/sites/default/files"
@@ -121,9 +127,10 @@ help)
 
 save)
     REMOTE_URI="$2"
+    DIR_TO_SAVE="$3"
     shift 2
-    echo "packing $@ to a tarball"
-    tar -czf $TMPFILE $@
+    echo "packing $DIR_TO_SAVE to a tarball"
+    tar -vpczf $TMPFILE -C $DIR_TO_SAVE .
     store  $TMPFILE $REMOTE_URI
     rm -rf $TMPFILE
     ;;
@@ -145,7 +152,7 @@ load)
         exit 0
     fi
     rm -f $EXTRACT_PATH/__completed
-    retrieve $REMOTE_URI - | tar -xz -C $EXTRACT_PATH
+    retrieve $REMOTE_URI - | tar -vxz -C $EXTRACT_PATH
     if [ $? -ne 0 ]; then
         echo "failed to get the tarball"
     else

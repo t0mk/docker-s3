@@ -115,7 +115,7 @@ In following doc, <path> can be either
    Database names are given by file names in the tar.gz.
    If you don't want to load if some db exists, set CREATES_DB.
    If you want to delete existing DBS in favor of the loaded ones,
-   set DROP_EXISTING_DBS.
+   set DROP_OLD_DBS.
    DB_PORT defaults to 3306
    so far it works for MariaDB and MySQL
 
