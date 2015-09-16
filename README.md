@@ -1,13 +1,13 @@
 # Docker S3 image
 
-This is an image which is capable of saving and restoring to/from S3. It can work with directories and with MySQL/Mariadb database dumps. There are 4 commands:
+This is an image which is capable of saving and restoring various artifacts. It can save/load to/from to a local path, or S3. It can work with directories and with MySQL/Mariadb database dumps. There are commands:
 
-- save: make tarball from given directories on container fs, and upload it to a path in S3
-- load: download tarball from path in S3 and extract it somewhere in the container fs
-- savesql: dump databases from given mysql/mariadb url, put them to a tarball, and upload the tarball to S3
-- loadsql: download tarball from path in S3 and load it to a mysql/mariadb server in given url
-- savesqlite: dump main database from given sqlite file, gzip it, and upload to S3
-- loadsqlite: donwload gzippped sqlite dump from S3 and load (".restore") it to given db
+- save: make tarball from given directories on container fs and arbitrarily upload it to a path in S3
+- load: extract tarball in container fs. The tarball can come from path in S3, or from local file
+- savesql: dump databases from given mysql/mariadb url, put them to a tarball, and arbitrarily upload the tarball to S3
+- loadsql: load databases from a tarball to a Mysql/Mariadb. the tarball can come from S3 or local file
+- savesqlite: dump main database from given sqlite file, gzip it, and arbitrarily upload to S3
+- loadsqlite:load (".restore") gzippped sqlite dump from S3 or local path
 
 **Note**: If you do save/load, you probably want to include volumes from a service container. If you do saveqsl/loadsql, you probably want to link the db container, and/or pass proper location in DB_HOST. For loadsq/savesql, the database credentials and location are passed in environment variables `DB_USER:DB_PASS@DB_HOST:DB_PORT`.
 
@@ -19,7 +19,7 @@ $ docker build -t t0mk/s3 ./
 
 ## Usage
 
-You must set env vars: `REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY`.
+If you want to work with S3, you must set env vars: `REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY`.
 
 ### exampel of boostrap with docker-compose
 
