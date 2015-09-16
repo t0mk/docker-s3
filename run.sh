@@ -22,11 +22,11 @@ store () {
         echo running \$ $CMD
         $CMD
         if [ $? -eq 0 ]; then
+            OUT_VERSION=`grep -- "x-amz-version-id" $OUTPUTFILE | cut -f 2 -d' '`
             echo "=> You have uploaded file $LOCALFILE as"
             echo "   s3://$BUCKET/$S3PATH"
-            echo "=> version:"
-            printf "   "
-            grep -- "x-amz-version-id" $OUTPUTFILE | cut -f 2 -d' '
+            echo "=> With version:"
+            echo "   s3://$BUCKET/$S3PATH:${OUT_VERSION}"
         else
             echo "Something went wrong:"
             cat $OUTPUTFILE
@@ -255,6 +255,10 @@ loadsql)
                 echo "=> Loading database ${DB_NAME}"
                 $SQLCMD_BASE ${DB_NAME} < ${DUMP_DIR}/${DB_NAME}
                 $SQLCMD_BASE ${DB_NAME} -e "CREATE TABLE dump_load_done (dummy INT)"
+                if [ $? -eq 0 ]; then
+                    echo "Don't worry if the 'dump_load_done' table exists, its"
+                    echo "just a marker for bootstrapping."
+                fi
 
             else
                 echo "=> CREATE not OK, not loading database ${DB_NAME}"
