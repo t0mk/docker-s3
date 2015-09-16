@@ -74,6 +74,7 @@ savedb:
 
 ### All commands
 
+
 also in `help` command to the container:
 
 ```
@@ -112,7 +113,9 @@ In following doc, <path> can be either
    load tar.gz from path (containing sql dumps) and load it to
    DB_USER:DB_PASS@DB_HOST:DB_PORT
    Database names are given by file names in the tar.gz.
-   If you don't want to download if some db exists, set CREATES_DB.
+   If you don't want to load if some db exists, set CREATES_DB.
+   If you want to delete existing DBS in favor of the loaded ones,
+   set DROP_EXISTING_DBS.
    DB_PORT defaults to 3306
    so far it works for MariaDB and MySQL
 
@@ -127,4 +130,10 @@ In following doc, <path> can be either
    get interactive shell in the container
    best run as:
    $ docker run -it t0mk/s3 sh
+```
+
+This is jut for me to regerate the readme.
+
+```
+docker run -it t0mk/s3 help >> README.md`
 ```

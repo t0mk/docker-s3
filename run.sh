@@ -97,7 +97,9 @@ help)
     echo "   load tar.gz from path (containing sql dumps) and load it to"
     echo "   DB_USER:DB_PASS@DB_HOST:DB_PORT"
     echo "   Database names are given by file names in the tar.gz".
-    echo "   If you don't want to download if some db exists, set CREATES_DB."
+    echo "   If you don't want to load if some db exists, set CREATES_DB."
+    echo "   If you want to delete existing DBS in favor of the loaded ones,"
+    echo "   set DROP_OLD_DBS."
     echo "   DB_PORT defaults to 3306"
     echo "   so far it works for MariaDB and MySQL"
     echo
@@ -236,6 +238,10 @@ loadsql)
     SQL_DUMPS="$(ls $DUMP_DIR)"
     if [ -n "$SQL_DUMPS" ]; then
         for DB_NAME in $SQL_DUMPS; do
+            if [ -n "$DROP_EXISTING_DBS" ]; then
+                echo "=> Dropping database ${DB_NAME}"
+                $SQLCMD_BASE -e "DROP DATABASE ${DB_NAME}"
+            fi
             echo "=> Creating database ${DB_NAME}"
             $SQLCMD_BASE -e "CREATE DATABASE ${DB_NAME}"
             if [ $? -eq 0 ]; then
