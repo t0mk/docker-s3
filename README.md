@@ -1,4 +1,4 @@
-# Docker S3 image
+# Image for loading and restoring file/db dumps
 
 This is an image which is capable of saving and restoring various artifacts. It can save/load to/from to a local path, or S3. It can download dumps from HTTP. It can work with directories and with MySQL/Mariadb database dumps. There are commands:
 
