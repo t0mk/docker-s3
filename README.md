@@ -1,6 +1,6 @@
 # Docker S3 image
 
-This is an image which is capable of saving and restoring various artifacts. It can save/load to/from to a local path, or S3. It can work with directories and with MySQL/Mariadb database dumps. There are commands:
+This is an image which is capable of saving and restoring various artifacts. It can save/load to/from to a local path, or S3. It can download dumps from HTTP. It can work with directories and with MySQL/Mariadb database dumps. There are commands:
 
 - save: make tarball from given directories on container fs and arbitrarily upload it to a path in S3
 - load: extract tarball in container fs. The tarball can come from path in S3, or from local file
@@ -87,6 +87,7 @@ In following doc, <path> can be either
   - s3://bucket/furter/file.gz:TEd_lVrPewCVHxIsrBJU3uckhzwCZ2GD
 - or just absolute file-path (pointing to a volume) in the container:
   - /volume/file.gz
+- for load\* commands, path can be a HTTP URL
 
 => save <path> <dir1> [dirN]*
    saves tar.gz with dirs listed in args to S3path to bucket BUCKET
