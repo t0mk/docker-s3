@@ -23,10 +23,15 @@ store () {
         $CMD
         if [ $? -eq 0 ]; then
             OUT_VERSION=`grep -- "x-amz-version-id" $OUTPUTFILE | cut -f 2 -d' '`
-            echo "=> You have uploaded file $LOCALFILE as"
-            echo "   s3://$BUCKET/$S3PATH"
-            echo "=> With version:"
-            echo "   s3://$BUCKET/$S3PATH:${OUT_VERSION}"
+            if [ -z "$OUT_VERSION" ]; then
+                echo "No version in S3 PUT response, something went wrong:"
+                cat $OUTPUTFILE
+            else
+                echo "=> You have uploaded file $LOCALFILE as"
+                echo "   s3://$BUCKET/$S3PATH"
+                echo "=> With version:"
+                echo "   s3://$BUCKET/$S3PATH:${OUT_VERSION}"
+            fi
         else
             echo "Something went wrong:"
             cat $OUTPUTFILE
@@ -57,6 +62,17 @@ retrieve () {
              cat $LOCALFILE >&2
              exit 1
         fi
+    elif [ "${SRC:0:7}" = "http://" -o "${SRC:0:8}" = "https://"  ]; then
+        curl --progress-bar -o "$LOCALFILE" $SRC
+        if [ $? -ne 0 ]; then
+             if [ "$LOCALFILE" = '-' ]; then
+                  LOCALFILE=/tmp/poop
+                  curl --progress-bar -o "$LOCALFILE" $SRC
+             fi
+             cat $LOCALFILE >&2
+             exit 1
+        fi
+
     else
         if [ "$LOCALFILE" = "-" ]; then
             cat $SRC
