@@ -146,7 +146,7 @@ save)
     DIR_TO_SAVE="$3"
     shift 2
     echo "packing $DIR_TO_SAVE to a tarball"
-    tar -vpczf $TMPFILE -C $DIR_TO_SAVE .
+    tar --exclude=__completed -vpczf $TMPFILE -C $DIR_TO_SAVE .
     store  $TMPFILE $REMOTE_URI
     rm -rf $TMPFILE
     ;;
@@ -168,7 +168,7 @@ load)
         exit 0
     fi
     rm -f $EXTRACT_PATH/__completed
-    retrieve $REMOTE_URI - | tar -vxz -C $EXTRACT_PATH
+    retrieve $REMOTE_URI - | tar -xz -C $EXTRACT_PATH
     if [ $? -ne 0 ]; then
         echo "failed to get the tarball"
     else
@@ -195,7 +195,7 @@ savesql)
             exit 1
         fi
         echo "Dumping db $d ..."
-        $DUMP_CMD "$d" > "$DUMP_DIR/$d"
+        $DUMP_CMD --ignore-table "${d}.dump_load_done" "$d" > "$DUMP_DIR/$d"
         if [ $? -ne 0 ]; then
             echo "Some sort of error while dumping the db, check the output ^."
             echo "THE DUMP IS NOT CREATED!"
@@ -238,6 +238,11 @@ loadsql)
     DUMP_DIR=/tmp/dumpdir
     mkdir $DUMP_DIR
     tar -xzf $DUMP -C $DUMP_DIR
+    if [ $? -ne 0 ]; then
+        echo "Problem with tarball"
+        cat $DUMP
+        exit 0
+    fi
 
     DB_CONNECTABLE=nope
     SQLCMD_BASE="mysql -u${DB_USER} -p${DB_PASS} -P${DB_PORT} -h${DB_HOST}"
@@ -271,7 +276,7 @@ loadsql)
                 echo "=> Loading database ${DB_NAME}"
                 $SQLCMD_BASE ${DB_NAME} < ${DUMP_DIR}/${DB_NAME}
                 $SQLCMD_BASE ${DB_NAME} -e "CREATE TABLE dump_load_done (dummy INT)"
-                if [ $? -eq 0 ]; then
+                if [ $? -ne 0 ]; then
                     echo "Don't worry if the 'dump_load_done' table exists, its"
                     echo "just a marker for bootstrapping."
                 fi
