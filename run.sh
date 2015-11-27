@@ -103,6 +103,8 @@ help)
     echo "=> load <path>[:<S3_object_version>] <extract_dir>"
     echo "   downloads tar.gz from <path> and extracts it to"
     echo "   extract_dir. Extract dir must exists and should be a volume."
+    echo "   If you want to remote existing filesin favor of the loaded ones,"
+    echo "   set REMOVE_EXISTING_FILES."
     echo "   examples:"
     echo "     load s3://mybucket/files.tar.gz /var/www/sites/default/files"
     echo "     load s3://mybucket/files.tar.gz:TEd_lVrPewCVHxIsrBJU3uckhzwCZ2GD /var/www/sites/default/files"
@@ -121,7 +123,7 @@ help)
     echo "   Database names are given by file names in the tar.gz".
     echo "   If you don't want to load if some db exists, set CREATES_DB."
     echo "   If you want to delete existing DBS in favor of the loaded ones,"
-    echo "   set DROP_OLD_DBS."
+    echo "   set DROP_EXISTING_DBS."
     echo "   DB_PORT defaults to 3306"
     echo "   so far it works for MariaDB and MySQL"
     echo
@@ -163,9 +165,16 @@ load)
         exit 1
     fi
     if [ -f ${EXTRACT_PATH}/__completed ]; then
-        echo "Seems that files are already downloaded. NOT DOWNLOADING!"
-        echo "if you want to re-download, remove ${EXTRACT_PATH}/__completed"
-        exit 0
+        if [ -n "${REMOVE_EXISTING_FILES}" ] ; then
+            echo "Seems that files were already downloaded before, but you "
+            echo "chose to REMOVE_EXISTING_FILES, so it will be re-downloaded."
+            rm -rf ${EXTRACT_PATH}/*
+        else
+            echo "Seems that files are already downloaded. NOT DOWNLOADING!"
+            echo "if you want to re-download, remove ${EXTRACT_PATH}/__completed .."
+            echo ".. or set REMOVE_EXISTING_FILES envvar."
+            exit 0
+        fi
     fi
     rm -f $EXTRACT_PATH/__completed
     retrieve $REMOTE_URI - | tar -xz -C $EXTRACT_PATH
