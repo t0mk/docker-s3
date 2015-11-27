@@ -144,6 +144,14 @@ help)
 
 
 save)
+    if [ $# -ne 3 ]; then
+        echo "<save> needs 2 args"
+        exit 1
+    fi
+    if [ -z "$2" -o -z "$3" ]; then
+        echo "args must be nonempty"
+        exit 1
+    fi
     REMOTE_URI="$2"
     DIR_TO_SAVE="$3"
     shift 2
@@ -154,6 +162,14 @@ save)
     ;;
 
 load)
+    if [ $# -ne 3 ]; then
+        echo "<load> needs 2 args"
+        exit 1
+    fi
+    if [ -z "$2" -o -z "$3" ]; then
+        echo "args must be nonempty"
+        exit 1
+    fi
     REMOTE_URI=$2
     EXTRACT_PATH="$3"
     if [ -z "$EXTRACT_PATH" ]; then
@@ -187,6 +203,14 @@ load)
     ;;
 
 savesql)
+    if [ $# -lt 3 ]; then
+        echo "<savesql> needs at least 2 args"
+        exit 1
+    fi
+    if [ -z "$2" -o -z "$3" ]; then
+        echo "args must be nonempty"
+        exit 1
+    fi
     REMOTE_URI="$2"
     DUMP_DIR=/dumps
     mkdir $DUMP_DIR
@@ -220,6 +244,14 @@ savesql)
     ;;
 
 loadsql)
+    if [ $# -ne 2 ]; then
+        echo "<loadsql> needs 1 arg"
+        exit 1
+    fi
+    if [ -z "$2" ]; then
+        echo "args must be nonempty"
+        exit 1
+    fi
     DB_PORT=3306
     if [ -n "$CREATES_DB" ]; then
         # wupiao
@@ -304,6 +336,14 @@ loadsql)
 
 
 savesqlite)
+    if [ $# -ne 3 ]; then
+        echo "<savesqlite> needs 2 args"
+        exit 1
+    fi
+    if [ -z "$2" -o -z "$3" ]; then
+        echo "args must be nonempty"
+        exit 1
+    fi
     REMOTE_URI="$2"
     DBPATH="$3"
     DUMP=/dump
@@ -316,6 +356,14 @@ savesqlite)
     ;;
 
 loadsqlite)
+    if [ $# -ne 3 ]; then
+        echo "<loadsqlite> needs 2 args"
+        exit 1
+    fi
+    if [ -z "$2" -o -z "$3" ]; then
+        echo "args must be nonempty"
+        exit 1
+    fi
     REMOTE_URI="$2"
     ZIPDUMP=/dump.gz
     DUMP=/dump
